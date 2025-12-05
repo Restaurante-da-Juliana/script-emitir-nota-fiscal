@@ -8,35 +8,26 @@ class ReceitaFederalPage(BasePage):
     def __init__(self, page: Page):
         super().__init__(page)
         self.url = os.getenv("BASE_URL")
+        self.user = os.getenv("USER")
+        self.password = os.getenv("PASSWORD")
     
     def acessar_portal(self):
-        """Acessa o portal da NF-e"""
         self.navigate(self.url)
         self.screenshot("01_portal_inicial.png")
-    
-    def selecionar_estado(self, uf: str):
-        """Seleciona o estado"""
-        # Exemplo de seletor - ajustar conforme site real
-        self.select_option("#ddlUF", uf)
-        self.screenshot(f"02_estado_selecionado_{uf}.png")
+
+    def logar_credenciais(self):
+        self.page.get_by_role("textbox", name="Usuário (CPF)").click()
+        self.page.get_by_role("textbox", name="Usuário (CPF)").fill(self.user)
+        self.page.get_by_role("textbox", name="Senha").click()
+        self.page.get_by_role("textbox", name="Senha").fill(self.password)
+        self.page.get_by_role("button", name="Login").click()
     
     def acessar_emissao_nfe(self):
-        """Acessa a área de emissão de NF-e"""
-        # Clicar no link de emissão - ajustar seletor
-        self.click("text=Emissão de NF-e")
-        self.wait_for_load()
-        self.screenshot("03_area_emissao.png")
+        self.page.get_by_role("link", name="NFA-e MEI e NFA-e (Modelo 55)").click()
+        self.page.get_by_role("link", name="Emissão").click()
     
-    def preencher_dados_emitente(self, cnpj: str, inscricao_estadual: str):
-        """Preenche dados do emitente"""
-        # Ajustar seletores conforme site real
-        if self.page.query_selector("#txtCNPJ"):
-            self.fill("#txtCNPJ", cnpj)
-        
-        if self.page.query_selector("#txtIE"):
-            self.fill("#txtIE", inscricao_estadual)
-        
-        self.screenshot("05_dados_emitente.png")
+    def preencher_dados_emitente(self):
+        self.page.get_by_role("button", name="Avançar").click()
     
     def preencher_dados_destinatario(self, dados_destinatario: dict):
         """Preenche dados do destinatário"""
