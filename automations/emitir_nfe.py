@@ -68,63 +68,26 @@ def emitir_nota_fiscal(
 
         logger.info("Preenchendo Inscrição estadual")
         receita.preenchendo_inscricao_estadual()
+
+        logger.info("Preenchendo Dados do destinatário")
+        receita.preenchendo_dados_destinatario()
         
-        # 6. Adicionar produtos
-        logger.info(f"Adicionando {len(produtos)} produto(s)...")
-        receita.adicionar_multiplos_produtos(produtos)
+        logger.info("Preenchendo Identificação da Nota")
+        receita.preenchendo_identificadao_nota()
+
+        logger.info("Avançando Local de Retirada/Entrega")
+        receita.local_retirada_entrega()
+
+        logger.info("Preenchendo Produtos")
+        receita.preenchendo_produtos()
+
         
-        # 7. Calcular valor total se não fornecido
-        if not valor_total:
-            valor_total = sum(p.get("quantidade", 0) * p.get("valor_unitario", 0) for p in produtos)
-        
-        logger.info(f"Valor total da nota: R$ {valor_total:.2f}")
-        
-        # 8. Preencher dados de pagamento
-        logger.info("Preenchendo dados de pagamento...")
-        receita.preencher_dados_pagamento(valor=valor_total)
-        
-        # 9. Preencher dados de transporte
-        logger.info("Preenchendo dados de transporte...")
-        receita.preencher_dados_transporte()
-        
-        # 10. Adicionar informações adicionais
-        if informacoes_adicionais:
-            logger.info("Adicionando informações complementares...")
-            receita.adicionar_informacoes_adicionais(informacoes_adicionais)
-        
-        # 11. Validar nota
-        logger.info("Validando nota fiscal...")
-        receita.validar_nota()
-        
-        # Aguardar confirmação do usuário antes de transmitir
-        input("Revise a nota e pressione ENTER para transmitir...")
-        
-        # 12. Transmitir nota
-        logger.info("Transmitindo nota fiscal...")
-        receita.transmitir_nota()
-        
-        # 13. Obter número da nota
-        numero_nota = receita.obter_numero_nota()
-        logger.info(f"✓ Nota fiscal emitida com sucesso! Número: {numero_nota}")
-        
-        # 14. Baixar XML e DANFE
-        logger.info("Baixando XML e DANFE...")
-        xml_path = receita.baixar_xml()
-        danfe_path = receita.baixar_danfe()
-        
-        logger.info(f"XML salvo em: {xml_path}")
-        logger.info(f"DANFE salvo em: {danfe_path}")
-        
-        logger.info("=" * 60)
-        logger.info("EMISSÃO CONCLUÍDA COM SUCESSO!")
-        logger.info("=" * 60)
-        
-        return {
-            "sucesso": True,
-            "numero_nota": numero_nota,
-            "xml_path": xml_path,
-            "danfe_path": danfe_path
-        }
+        ##return {
+        ##    "sucesso": True,
+        ##    "numero_nota": numero_nota,
+        ##    "xml_path": xml_path,
+        ##    "danfe_path": danfe_path
+        ##}
         
     except Exception as e:
         logger.error(f"❌ Erro na emissão: {str(e)}")

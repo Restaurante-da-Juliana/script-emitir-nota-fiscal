@@ -13,6 +13,9 @@ class ReceitaFederalPage(BasePage):
         self.cpf = os.getenv("CPF")
         self.cnpj = os.getenv("CNPJ")
         self.ie = os.getenv("IE")
+        self.razao_social = os.getenv("RAZAO_SOCIAL")
+        self.cep = os.getenv("CEP")
+        self.numero = os.getenv("NUMERO")
     
     def acessar_portal(self):
         self.navigate(self.url)
@@ -56,103 +59,50 @@ class ReceitaFederalPage(BasePage):
         textbox.click()
         textbox.fill(self.ie)
 
-    def adicionar_produto(self, produto: dict):
-        """Adiciona um produto à nota"""
-        # Clicar em adicionar produto
-        self.click("text=Adicionar Produto")
-        
-        # Preencher dados do produto
-        if produto.get("codigo"):
-            self.fill("#txtCodigoProduto", produto["codigo"])
-        
-        if produto.get("descricao"):
-            self.fill("#txtDescricao", produto["descricao"])
-        
-        if produto.get("ncm"):
-            self.fill("#txtNCM", produto["ncm"])
-        
-        if produto.get("quantidade"):
-            self.fill("#txtQuantidade", str(produto["quantidade"]))
-        
-        if produto.get("valor_unitario"):
-            self.fill("#txtValorUnitario", str(produto["valor_unitario"]))
-        
-        # Calcular valor total automaticamente
-        if produto.get("quantidade") and produto.get("valor_unitario"):
-            valor_total = produto["quantidade"] * produto["valor_unitario"]
-            self.fill("#txtValorTotal", str(valor_total))
-        
-        # Confirmar adição
-        self.click("button:has-text('Confirmar')")
-        self.screenshot(f"07_produto_adicionado_{produto.get('codigo', 'sem_codigo')}.png")
-    
-    def adicionar_multiplos_produtos(self, produtos: list):
-        """Adiciona múltiplos produtos"""
-        for i, produto in enumerate(produtos, 1):
-            print(f"Adicionando produto {i}/{len(produtos)}: {produto.get('descricao', 'N/A')}")
-            self.adicionar_produto(produto)
-            time.sleep(1)
-    
-    def preencher_dados_pagamento(self, forma_pagamento: str = "01", valor: float = None):
-        """Preenche dados de pagamento"""
-        # 01 = Dinheiro, 03 = Cartão de Crédito, etc.
-        self.select_option("#ddlFormaPagamento", forma_pagamento)
-        
-        if valor:
-            self.fill("#txtValorPagamento", str(valor))
-        
-        self.screenshot("08_dados_pagamento.png")
-    
-    def preencher_dados_transporte(self, modalidade: str = "9"):
-        """Preenche dados de transporte"""
-        # 9 = Sem transporte
-        self.select_option("#ddlModalidadeFrete", modalidade)
-        self.screenshot("09_dados_transporte.png")
-    
-    def adicionar_informacoes_adicionais(self, informacoes: str):
-        """Adiciona informações complementares"""
-        if self.page.query_selector("#txtInformacoesComplementares"):
-            self.fill("#txtInformacoesComplementares", informacoes)
-        self.screenshot("10_informacoes_adicionais.png")
-    
-    def validar_nota(self):
-        """Valida a nota antes de transmitir"""
-        self.click("button:has-text('Validar')")
-        time.sleep(2)
-        self.screenshot("11_nota_validada.png")
-    
-    def transmitir_nota(self):
-        """Transmite a nota fiscal"""
-        self.click("button:has-text('Transmitir')")
-        time.sleep(3)
-        self.screenshot("12_nota_transmitida.png")
-    
-    def obter_numero_nota(self) -> str:
-        """Obtém o número da nota fiscal emitida"""
-        # Ajustar seletor conforme site real
-        numero = self.page.text_content("#lblNumeroNF")
-        return numero
-    
-    def baixar_xml(self):
-        """Baixa o XML da nota"""
-        with self.page.expect_download() as download_info:
-            self.click("text=Download XML")
-        
-        download = download_info.value
-        os.makedirs(settings.DOWNLOADS_DIR, exist_ok=True)
-        file_path = os.path.join(settings.DOWNLOADS_DIR, download.suggested_filename)
-        download.save_as(file_path)
-        
-        return file_path
-    
-    def baixar_danfe(self):
-        """Baixa o DANFE (PDF)"""
-        with self.page.expect_download() as download_info:
-            self.click("text=Imprimir DANFE")
-        
-        download = download_info.value
-        os.makedirs(settings.DOWNLOADS_DIR, exist_ok=True)
-        file_path = os.path.join(settings.DOWNLOADS_DIR, download.suggested_filename)
-        download.save_as(file_path)
-        
-        return file_path
+    def preenchendo_dados_destinatario(self):
+        textbox_razao_social = self.page.get_by_role("textbox").nth(3)
+        textbox_razao_social.click()
+        textbox_razao_social.fill(self.razao_social)
+
+        textbox_cep = self.page.locator(".slds-input.slds-size_3-of-12")
+        textbox_cep.click()
+        textbox_cep.fill(self.cep)
+        self.page.get_by_text("Endereço").click()
+
+        textbox_numero = self.page.locator(".slds-form-element.slds-col.slds-size_1-of-12 > .slds-form-element__control > .slds-input")
+        textbox_numero.click()
+        textbox_numero.fill(self.numero)
+        self.page.get_by_role("button", name="Avançar").click()
+
+    def preenchendo_identificadao_nota(self):
+        self.page.locator("#combobox-id-1").click()
+        self.page.locator("span").filter(has_text="Venda").first.click()
+
+        self.page.get_by_role("combobox").nth(1).select_option("1")
+
+        self.page.get_by_role("combobox").nth(3).select_option("1")
+
+        self.page.get_by_role("combobox").nth(4).select_option("1")
+
+        self.page.locator(".slds-form-element.slds-size_6-of-12 > div:nth-child(3) > .slds-form-element > .slds-form-element__control > span > .slds-radio__label > .slds-radio_faux").first.click()
+
+        self.page.get_by_role("button", name="Avançar").click()
+
+    def local_retirada_entrega(self):
+        botao = self.page.get_by_role("button", name="Avançar")
+        botao.wait_for(state="attached")
+        botao.wait_for(state="visible")
+        botao.wait_for(state="enabled")
+        botao.click()
+
+
+    def preenchendo_produtos(self):
+        campoDescricao = self.page.get_by_role("textbox").nth(1)
+
+        campoDescricao.wait_for(state="visible")
+        campoDescricao.wait_for(state="attached")
+        campoDescricao.wait_for(state="editable")
+
+        campoDescricao.fill("REFEIÇÃO NO RESTAURANTE DA JULIANA")
+
+
