@@ -10,6 +10,9 @@ class ReceitaFederalPage(BasePage):
         self.url = os.getenv("BASE_URL")
         self.user = os.getenv("USER")
         self.password = os.getenv("PASSWORD")
+        self.cpf = os.getenv("CPF")
+        self.cnpj = os.getenv("CNPJ")
+        self.ie = os.getenv("IE")
     
     def acessar_portal(self):
         self.navigate(self.url)
@@ -27,21 +30,32 @@ class ReceitaFederalPage(BasePage):
         self.page.get_by_role("link", name="Emissão").click()
     
     def preencher_dados_emitente(self):
-        self.page.get_by_role("button", name="Avançar").click()
-    
-    def preencher_dados_destinatario(self, dados_destinatario: dict):
-        """Preenche dados do destinatário"""
-        if dados_destinatario.get("cnpj"):
-            self.fill("#txtCNPJDestinatario", dados_destinatario["cnpj"])
-        
-        if dados_destinatario.get("razao_social"):
-            self.fill("#txtRazaoSocial", dados_destinatario["razao_social"])
-        
-        if dados_destinatario.get("endereco"):
-            self.fill("#txtEndereco", dados_destinatario["endereco"])
-        
-        self.screenshot("06_dados_destinatario.png")
-    
+        btn = self.page.get_by_role("button", name="Avançar")
+        btn.wait_for(state="attached")
+        btn.wait_for(state="visible")
+        self.page.wait_for_timeout(150)
+        btn.click()
+
+    def selecionar_e_preencher_cpf_ou_cnpj(self):
+        if self.cpf and len(self.cpf) > 0:
+            locator = self.page.locator(".slds-radio_faux").first
+            locator.wait_for(state="visible")
+            locator.click()
+            self.page.get_by_role("textbox").nth(1).click()
+            self.page.get_by_role("textbox").nth(1).fill(self.cpf)
+        else:
+            locator = self.page.locator("span:nth-child(2) > .slds-radio__label > .slds-radio_faux")
+            locator.wait_for(state="visible")
+            locator.click()
+            textbox = self.page.get_by_role("textbox").nth(1)
+            textbox.click()
+            textbox.fill(self.cnpj)
+
+    def preenchendo_inscricao_estadual(self):
+        textbox = self.page.get_by_role("textbox").nth(2)
+        textbox.click()
+        textbox.fill(self.ie)
+
     def adicionar_produto(self, produto: dict):
         """Adiciona um produto à nota"""
         # Clicar em adicionar produto

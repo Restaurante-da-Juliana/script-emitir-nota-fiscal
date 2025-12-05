@@ -51,26 +51,23 @@ def emitir_nota_fiscal(
         page = browser.start()
         receita = ReceitaFederalPage(page)
         
-        # 1. Acessar portal
         logger.info("Acessando portal da Receita Federal...")
         receita.acessar_portal()
 
-        # 2. Acessar portal
         logger.info("Logando-se com as credenciais na página da Receita Federal...")
         receita.logar_credenciais()
         
-        # 3. Acessar emissão de NF-e
         logger.info("Acessando área de emissão de NF-e...")
         receita.acessar_emissao_nfe()
-        
-        # 4. Preencher dados do emitente
-        logger.info(f"Preenchendo dados do emitente")
-        receita.preencher_dados_emitente(cnpj_emitente, inscricao_estadual)
-        
-        # 5. Preencher dados do destinatário
-        if dados_destinatario:
-            logger.info("Preenchendo dados do destinatário...")
-            receita.preencher_dados_destinatario(dados_destinatario)
+
+        logger.info("Preenchendo os dados do emitente...")
+        receita.preencher_dados_emitente()
+
+        logger.info("Escolhendo e preenchendo CPF ou CNPJ")
+        receita.selecionar_e_preencher_cpf_ou_cnpj()
+
+        logger.info("Preenchendo Inscrição estadual")
+        receita.preenchendo_inscricao_estadual()
         
         # 6. Adicionar produtos
         logger.info(f"Adicionando {len(produtos)} produto(s)...")
