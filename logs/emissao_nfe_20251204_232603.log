@@ -1,6 +1,0 @@
-2025-12-04 23:26:03,649 - INFO - ============================================================
-2025-12-04 23:26:03,650 - INFO - INICIANDO EMISSÃO DE NOTA FISCAL
-2025-12-04 23:26:03,650 - INFO - ============================================================
-2025-12-04 23:26:09,800 - INFO - Fechando navegador...
-2025-12-04 23:26:09,828 - ERROR - Task was destroyed but it is pending!
-task: <Task pending name='Task-3' coro=<Connection.run.<locals>.init() running at C:\Users\User\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_connection.py:310> wait_for=<Future pending cb=[Task.task_wakeup()]> cb=[ProtocolCallback.__init__.<locals>.cb() at C:\Users\User\AppData\Local\Programs\Python\Python313\Lib\site-packages\playwright\_impl\_connection.py:230]>
